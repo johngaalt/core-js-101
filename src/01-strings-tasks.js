@@ -216,7 +216,7 @@ function getRectangleString(width, height) {
 
   rectangle += `┌${'─'.repeat(width - 2)}┐\n`;
 
-  for (let i = 0; i < height - 2; i++) {
+  for (let i = 0; i < height - 2; i += 1) {
     rectangle += `│${' '.repeat(width - 2)}│\n`;
   }
 
