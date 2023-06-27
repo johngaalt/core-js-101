@@ -117,9 +117,34 @@ class BaseSelector {
   constructor() {
     this.parts = [];
     this.hasElement = false;
+    this.partOrder = [];
+  }
+
+  validateOrder(currentPart) {
+    const lastPart = this.partOrder[this.partOrder.length - 1];
+    const validOrder = [
+      'element',
+      'id',
+      'class',
+      'attribute',
+      'pseudoClass',
+      'pseudoElement',
+    ];
+
+    if (
+      lastPart
+      && validOrder.indexOf(lastPart) > validOrder.indexOf(currentPart)
+    ) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element',
+      );
+    }
+
+    this.partOrder.push(currentPart);
   }
 
   element(element) {
+    this.validateOrder('element');
     if (this.hasElement) {
       throw new Error(
         'Element, id and pseudo-element should not occur more then one time inside the selector',
@@ -132,6 +157,7 @@ class BaseSelector {
   }
 
   id(id) {
+    this.validateOrder('id');
     const hasId = this.parts.some((p) => p.startsWith('#'));
 
     if (hasId) {
@@ -145,21 +171,25 @@ class BaseSelector {
   }
 
   class(className) {
+    this.validateOrder('class');
     this.parts.push(`.${className}`);
     return this;
   }
 
   attr(attribute) {
+    this.validateOrder('attribute');
     this.parts.push(`[${attribute}]`);
     return this;
   }
 
   pseudoClass(pseudoClass) {
+    this.validateOrder('pseudoClass');
     this.parts.push(`:${pseudoClass}`);
     return this;
   }
 
   pseudoElement(pseudoElement) {
+    this.validateOrder('pseudoElement');
     const hasPseudoElement = this.parts.some((p) => p.startsWith('::'));
 
     if (hasPseudoElement) {
@@ -188,6 +218,7 @@ class ElementSelector extends BaseSelector {
   constructor(element) {
     super();
 
+    this.validateOrder('element');
     if (this.hasElement) {
       throw new Error(
         'Element, id and pseudo-element should not occur more then one time inside the selector',
@@ -203,6 +234,7 @@ class IdSelector extends BaseSelector {
   constructor(id) {
     super();
 
+    this.validateOrder('id');
     const hasId = this.parts.some((p) => p.startsWith('#'));
 
     if (hasId) {
@@ -218,6 +250,7 @@ class IdSelector extends BaseSelector {
 class ClassSelector extends BaseSelector {
   constructor(className) {
     super();
+    this.validateOrder('class');
     this.parts.push(`.${className}`);
   }
 }
@@ -225,6 +258,7 @@ class ClassSelector extends BaseSelector {
 class AttrSelector extends BaseSelector {
   constructor(attribute) {
     super();
+    this.validateOrder('attribute');
     this.parts.push(`[${attribute}]`);
   }
 }
@@ -232,6 +266,7 @@ class AttrSelector extends BaseSelector {
 class PseudoClassSelector extends BaseSelector {
   constructor(pseudoClass) {
     super();
+    this.validateOrder('pseudoClass');
     this.parts.push(`:${pseudoClass}`);
   }
 }
@@ -240,6 +275,7 @@ class PseudoElementSelector extends BaseSelector {
   constructor(pseudoElement) {
     super();
 
+    this.validateOrder('pseudoElement');
     const hasPseudoElement = this.parts.some((p) => p.startsWith('::'));
 
     if (hasPseudoElement) {
