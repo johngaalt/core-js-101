@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* ************************************************************************************************
  *                                                                                                *
  * Please read the following tutorial before implementing tasks:                                   *
@@ -5,7 +6,6 @@
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object        *
  *                                                                                                *
  ************************************************************************************************ */
-
 
 /**
  * Returns the rectangle object with width and height parameters and getArea() method
@@ -30,7 +30,6 @@ function Rectangle(width, height) {
   };
 }
 
-
 /**
  * Returns the JSON representation of specified object
  *
@@ -44,7 +43,6 @@ function Rectangle(width, height) {
 function getJSON(obj) {
   return JSON.stringify(obj);
 }
-
 
 /**
  * Returns the object of specified type from JSON representation
@@ -60,7 +58,6 @@ function getJSON(obj) {
 function fromJSON(/* proto, json */) {
   throw new Error('Not implemented');
 }
-
 
 /**
  * Css selectors builder
@@ -116,36 +113,170 @@ function fromJSON(/* proto, json */) {
  *  For more examples see unit tests.
  */
 
+class BaseSelector {
+  constructor() {
+    this.parts = [];
+    this.hasElement = false;
+  }
+
+  element(element) {
+    if (this.hasElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+
+    this.parts.push(element);
+    this.hasElement = true;
+    return this;
+  }
+
+  id(id) {
+    const hasId = this.parts.some((p) => p.startsWith('#'));
+
+    if (hasId) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+
+    this.parts.push(`#${id}`);
+    return this;
+  }
+
+  class(className) {
+    this.parts.push(`.${className}`);
+    return this;
+  }
+
+  attr(attribute) {
+    this.parts.push(`[${attribute}]`);
+    return this;
+  }
+
+  pseudoClass(pseudoClass) {
+    this.parts.push(`:${pseudoClass}`);
+    return this;
+  }
+
+  pseudoElement(pseudoElement) {
+    const hasPseudoElement = this.parts.some((p) => p.startsWith('::'));
+
+    if (hasPseudoElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+
+    this.parts.push(`::${pseudoElement}`);
+    return this;
+  }
+
+  combine(selector, combinator) {
+    const combinedParts = [...this.parts, ` ${combinator} `, ...selector.parts];
+    const newSelector = new BaseSelector();
+    newSelector.parts = combinedParts;
+    return newSelector;
+  }
+
+  stringify() {
+    return this.parts.join('');
+  }
+}
+
+class ElementSelector extends BaseSelector {
+  constructor(element) {
+    super();
+
+    if (this.hasElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+
+    this.hasElement = true;
+    this.parts.push(element);
+  }
+}
+
+class IdSelector extends BaseSelector {
+  constructor(id) {
+    super();
+
+    const hasId = this.parts.some((p) => p.startsWith('#'));
+
+    if (hasId) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+
+    this.parts.push(`#${id}`);
+  }
+}
+
+class ClassSelector extends BaseSelector {
+  constructor(className) {
+    super();
+    this.parts.push(`.${className}`);
+  }
+}
+
+class AttrSelector extends BaseSelector {
+  constructor(attribute) {
+    super();
+    this.parts.push(`[${attribute}]`);
+  }
+}
+
+class PseudoClassSelector extends BaseSelector {
+  constructor(pseudoClass) {
+    super();
+    this.parts.push(`:${pseudoClass}`);
+  }
+}
+
+class PseudoElementSelector extends BaseSelector {
+  constructor(pseudoElement) {
+    super();
+
+    const hasPseudoElement = this.parts.some((p) => p.startsWith('::'));
+
+    if (hasPseudoElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+
+    this.parts.push(`::${pseudoElement}`);
+  }
+}
+
+// Usage example:
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(element) {
+    return new ElementSelector(element);
   },
-
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(id) {
+    return new IdSelector(id);
   },
-
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(className) {
+    return new ClassSelector(className);
   },
-
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(attribute) {
+    return new AttrSelector(attribute);
   },
-
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(pseudoClass) {
+    return new PseudoClassSelector(pseudoClass);
   },
-
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(pseudoElement) {
+    return new PseudoElementSelector(pseudoElement);
   },
-
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return selector1.combine(selector2, combinator);
   },
 };
-
 
 module.exports = {
   Rectangle,
