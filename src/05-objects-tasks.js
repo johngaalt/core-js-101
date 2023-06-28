@@ -295,8 +295,6 @@ class PseudoElementSelector extends BaseSelector {
   }
 }
 
-// Usage example:
-
 const cssSelectorBuilder = {
   element(element) {
     return new ElementSelector(element);

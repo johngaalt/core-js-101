@@ -21,7 +21,7 @@
  */
 function parseDataFromRfc2822(value) {
   const timestamp = Date.parse(value);
-  if (isNaN(timestamp)) {
+  if (Number.isNaN(timestamp)) {
     throw new Error('Invalid date format');
   }
   return new Date(timestamp);
@@ -40,7 +40,7 @@ function parseDataFromRfc2822(value) {
  */
 function parseDataFromIso8601(value) {
   const timestamp = Date.parse(value);
-  if (isNaN(timestamp)) {
+  if (Number.isNaN(timestamp)) {
     throw new Error('Invalid date format');
   }
   return new Date(timestamp);
